@@ -1,32 +1,33 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+// import { create } from "zustand";
 
-const useAuthStore = create(
-  persist(
-    (set) => ({
-      token: null,
-      user: null,
-      isLoggedIn: false,
+// const useAuthStore = create((set) => ({
+//   user: null,
+//   token: null,
+//   isAuth: false,
+//   setAuth: ({ user, token }) =>
+//     set(() => {
+//       localStorage.setItem("auth-token", token);
+//       return { user, token, isAuth: true };
+//     }),
+//   logout: () =>
+//     set(() => {
+//       localStorage.removeItem("auth-token");
+//       return { user: null, token: null, isAuth: false };
+//     }),
+// }));
 
-      login: (token, user) =>
-        set(() => ({
-          token,
-          user,
-          isLoggedIn: true,
-        })),
+// export default useAuthStore;
+import { useMutation } from "@tanstack/react-query";
+import { loginAPI } from "../api/authAPI";
+import useAuthStore from "../store/authstore";
 
-      logout: () =>
-        set(() => ({
-          token: null,
-          user: null,
-          isLoggedIn: false,
-        })),
-    }),
-    {
-      name: 'auth-storage', // localStorage key
-    }
-  )
-);
+export const useLogin = () => {
+  const setAuth = useAuthStore((state) => state.setAuth);
 
-export default useAuthStore;
-
+  return useMutation({
+    mutationFn: loginAPI,
+    onSuccess: (data) => {
+      setAuth({ user: data.user, token: data.token });
+    },
+  });
+};
